@@ -299,6 +299,34 @@ export default function App() {
     return "Shared expense";
   };
 
+  const handleQuickSettle = (friendId) => {
+    const balance = friendBalances[friendId] || 0;
+    if (balance === 0) return;
+
+    const amountCents = Math.abs(balance);
+    const paidBy = balance > 0 ? YOU_ID : friendId;
+    const splits =
+      balance > 0
+        ? { [YOU_ID]: 0, [friendId]: amountCents }
+        : { [YOU_ID]: amountCents, [friendId]: 0 };
+
+    const expense = {
+      id: uid(),
+      description: "Settle up",
+      amountCents,
+      paidBy,
+      participants: [YOU_ID, friendId],
+      splitType: "custom",
+      splits,
+      createdAt: Date.now(),
+    };
+
+    setData((prev) => ({
+      ...prev,
+      expenses: [expense, ...prev.expenses],
+    }));
+  };
+
   return (
     <div className="app">
       <header className="topbar">
@@ -316,7 +344,6 @@ export default function App() {
       {!selectedFriend ? (
         <main className="content">
           <section className="section">
-            <h2>Friends</h2>
             {data.friends.length === 0 ? (
               <p className="muted">Add an expense to create your first friend.</p>
             ) : (
@@ -324,7 +351,7 @@ export default function App() {
                 {data.friends.map((friend) => (
                   <button
                     key={friend.id}
-                    className="friend-card"
+                    className="friend-row"
                     onClick={() => setSelectedFriendId(friend.id)}
                   >
                     <div>
@@ -346,6 +373,20 @@ export default function App() {
                 <p className="eyebrow">Friend</p>
                 <h2>{selectedFriend.name}</h2>
                 <p className="muted">{renderFriendAmount(selectedFriend.id)}</p>
+              </div>
+              <div className="friend-actions">
+                <button
+                  className="ghost"
+                  type="button"
+                  onClick={() => handleQuickSettle(selectedFriend.id)}
+                  disabled={(friendBalances[selectedFriend.id] || 0) === 0}
+                >
+                  {friendBalances[selectedFriend.id] > 0
+                    ? "Mark paid"
+                    : friendBalances[selectedFriend.id] < 0
+                    ? "Pay now"
+                    : "Settled"}
+                </button>
               </div>
             </div>
             {selectedFriendExpenses.length === 0 ? (

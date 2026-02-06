@@ -86,11 +86,7 @@ select {
 }
 
 .section {
-  background: var(--panel);
-  border-radius: 20px;
-  padding: 1.5rem;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border);
+  padding: 0.25rem 0;
 }
 
 .friend-list {
@@ -100,11 +96,11 @@ select {
   margin-top: 1rem;
 }
 
-.friend-card {
-  background: #faf7f3;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 1rem;
+.friend-row {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  padding: 0.9rem 0.2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -112,7 +108,7 @@ select {
   cursor: pointer;
 }
 
-.friend-card h3 {
+.friend-row h3 {
   margin-bottom: 0.2rem;
 }
 
@@ -131,6 +127,18 @@ select {
   font-size: 0.7rem;
   color: var(--muted);
   font-weight: 600;
+}
+
+.friend-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.friend-actions .ghost[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .expense-list {
