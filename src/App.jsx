@@ -448,81 +448,105 @@ export default function App() {
         </div>
 
         <nav className="nav">
+          <NavLink to="/groups">Groups</NavLink>
           <NavLink to="/" end>
             Dashboard
           </NavLink>
           <NavLink to="/expenses">Expenses</NavLink>
         </nav>
-
-        <div className="panel">
-          <h2>Groups</h2>
-          <div className="group-list">
-            {data.groups.length === 0 ? (
-              <p className="muted">Create your first group to get started.</p>
-            ) : (
-              data.groups.map((group) => (
-                <button
-                  key={group.id}
-                  className={`group-item ${
-                    currentGroup?.id === group.id ? "active" : ""
-                  }`}
-                  onClick={() => handleSelectGroup(group.id)}
-                >
-                  <span>{group.name}</span>
-                  <small>{group.members.length} people</small>
-                </button>
-              ))
-            )}
-          </div>
-        </div>
-
-        <form className="panel" onSubmit={handleAddGroup}>
-          <h2>New group</h2>
-          <label>
-            Group name
-            <input
-              type="text"
-              value={groupForm.name}
-              onChange={(event) =>
-                setGroupForm((prev) => ({ ...prev, name: event.target.value }))
-              }
-              placeholder="Weekend getaway"
-            />
-          </label>
-          <label>
-            Members (comma separated)
-            <input
-              type="text"
-              value={groupForm.members}
-              onChange={(event) =>
-                setGroupForm((prev) => ({
-                  ...prev,
-                  members: event.target.value,
-                }))
-              }
-              placeholder="Ava, Leo, Nia"
-            />
-          </label>
-          <button className="primary" type="submit">
-            Create group
-          </button>
-        </form>
       </aside>
 
       <main className="content">
-        {!currentGroup ? (
-          <section className="empty">
-            <h2>Make sharing effortless.</h2>
-            <p>
-              Build a group on the left, then add expenses to see balances and
-              settle up in seconds.
-            </p>
-          </section>
-        ) : (
-          <Routes>
-            <Route
-              path="/"
-              element={
+        <Routes>
+          <Route
+            path="/groups"
+            element={
+              <>
+                <header className="header">
+                  <div>
+                    <p className="eyebrow">Groups</p>
+                    <h2>Create and manage groups</h2>
+                    <p className="muted">
+                      Build a group, then track balances and expenses.
+                    </p>
+                  </div>
+                </header>
+
+                <section className="grid two">
+                  <div className="card">
+                    <h3>All groups</h3>
+                    <div className="group-list">
+                      {data.groups.length === 0 ? (
+                        <p className="muted">
+                          Create your first group to get started.
+                        </p>
+                      ) : (
+                        data.groups.map((group) => (
+                          <button
+                            key={group.id}
+                            className={`group-item ${
+                              currentGroup?.id === group.id ? "active" : ""
+                            }`}
+                            onClick={() => handleSelectGroup(group.id)}
+                          >
+                            <span>{group.name}</span>
+                            <small>{group.members.length} people</small>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                  <form className="card" onSubmit={handleAddGroup}>
+                    <h3>New group</h3>
+                    <label>
+                      Group name
+                      <input
+                        type="text"
+                        value={groupForm.name}
+                        onChange={(event) =>
+                          setGroupForm((prev) => ({
+                            ...prev,
+                            name: event.target.value,
+                          }))
+                        }
+                        placeholder="Weekend getaway"
+                      />
+                    </label>
+                    <label>
+                      Members (comma separated)
+                      <input
+                        type="text"
+                        value={groupForm.members}
+                        onChange={(event) =>
+                          setGroupForm((prev) => ({
+                            ...prev,
+                            members: event.target.value,
+                          }))
+                        }
+                        placeholder="Ava, Leo, Nia"
+                      />
+                    </label>
+                    <button className="primary" type="submit">
+                      Create group
+                    </button>
+                  </form>
+                </section>
+              </>
+            }
+          />
+          <Route
+            path="/"
+            element={
+              !currentGroup ? (
+                <section className="empty">
+                  <h2>Choose a group first.</h2>
+                  <p>
+                    Head to the Groups page to create or select a group before
+                    viewing the dashboard.
+                  </p>
+                </section>
+              ) : (
                 <>
                   <header className="header">
                     <div>
@@ -663,267 +687,285 @@ export default function App() {
                     </form>
                   </section>
                 </>
-              }
-            />
+              )
+            }
+          />
             <Route
               path="/expenses"
               element={
-                <>
-                  <header className="header">
-                    <div>
-                      <p className="eyebrow">Expenses</p>
-                      <h2>Add and manage expenses</h2>
-                      <p className="muted">
-                        {currentGroup.name} · {currentGroup.members.length}
-                      </p>
-                    </div>
-                  </header>
-
-                  <section className="grid two">
-                    <form className="card" onSubmit={handleAddExpense}>
-                      <div className="card-header">
-                        <h3>
-                          {editingExpenseId ? "Edit expense" : "Add expense"}
-                        </h3>
-                        {editingExpenseId && (
-                          <button
-                            className="ghost"
-                            type="button"
-                            onClick={() => {
-                              setEditingExpenseId(null);
-                              setExpenseError("");
-                              setExpenseForm({
-                                description: "",
-                                amount: "",
-                                paidBy: currentGroup.members[0]?.id || "",
-                                participants: [],
-                                splitType: "even",
-                                customSplits: {},
-                              });
-                            }}
-                          >
-                            Cancel
-                          </button>
-                        )}
+                !currentGroup ? (
+                  <section className="empty">
+                    <h2>Select a group first.</h2>
+                    <p>
+                      Head to the Groups page to create or select a group before
+                      adding expenses.
+                    </p>
+                  </section>
+                ) : (
+                  <>
+                    <header className="header">
+                      <div>
+                        <p className="eyebrow">Expenses</p>
+                        <h2>Add and manage expenses</h2>
+                        <p className="muted">
+                          {currentGroup.name} · {currentGroup.members.length}
+                        </p>
                       </div>
+                    </header>
 
-                      <label>
-                        Description
-                        <input
-                          type="text"
-                          value={expenseForm.description}
-                          onChange={(event) =>
-                            setExpenseForm((prev) => ({
-                              ...prev,
-                              description: event.target.value,
-                            }))
-                          }
-                          placeholder="Dinner at Sora"
-                        />
-                      </label>
-                      <label>
-                        Amount
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          value={expenseForm.amount}
-                          onChange={(event) => {
-                            setExpenseError("");
-                            setExpenseForm((prev) => ({
-                              ...prev,
-                              amount: event.target.value,
-                            }));
-                          }}
-                          placeholder="120.00"
-                        />
-                      </label>
-                      <label>
-                        Paid by
-                        <select
-                          value={
-                            expenseForm.paidBy ||
-                            currentGroup.members[0]?.id ||
-                            ""
-                          }
-                          onChange={(event) =>
-                            setExpenseForm((prev) => ({
-                              ...prev,
-                              paidBy: event.target.value,
-                            }))
-                          }
-                        >
-                          {currentGroup.members.map((member) => (
-                            <option key={member.id} value={member.id}>
-                              {member.name}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-
-                      <div className="split-type">
-                        <p>Split type</p>
-                        <div className="toggle">
-                          <button
-                            type="button"
-                            className={
-                              expenseForm.splitType === "even" ? "active" : ""
-                            }
-                            onClick={() => {
-                              setExpenseError("");
-                              setExpenseForm((prev) => ({
-                                ...prev,
-                                splitType: "even",
-                              }));
-                            }}
-                          >
-                            Even
-                          </button>
-                          <button
-                            type="button"
-                            className={
-                              expenseForm.splitType === "custom" ? "active" : ""
-                            }
-                            onClick={() => {
-                              setExpenseError("");
-                              setExpenseForm((prev) => ({
-                                ...prev,
-                                splitType: "custom",
-                              }));
-                            }}
-                          >
-                            Custom
-                          </button>
+                    <section className="grid two">
+                      <form className="card" onSubmit={handleAddExpense}>
+                        <div className="card-header">
+                          <h3>
+                            {editingExpenseId ? "Edit expense" : "Add expense"}
+                          </h3>
+                          {editingExpenseId && (
+                            <button
+                              className="ghost"
+                              type="button"
+                              onClick={() => {
+                                setEditingExpenseId(null);
+                                setExpenseError("");
+                                setExpenseForm({
+                                  description: "",
+                                  amount: "",
+                                  paidBy: currentGroup.members[0]?.id || "",
+                                  participants: [],
+                                  splitType: "even",
+                                  customSplits: {},
+                                });
+                              }}
+                            >
+                              Cancel
+                            </button>
+                          )}
                         </div>
-                      </div>
 
-                      {expenseForm.splitType === "even" ? (
-                        <div className="split">
-                          <p>Split between</p>
-                          <div className="pill-grid">
-                            {currentGroup.members.map((member) => {
-                              const isActive =
-                                expenseForm.participants.length === 0 ||
-                                expenseForm.participants.includes(member.id);
+                        <label>
+                          Description
+                          <input
+                            type="text"
+                            value={expenseForm.description}
+                            onChange={(event) =>
+                              setExpenseForm((prev) => ({
+                                ...prev,
+                                description: event.target.value,
+                              }))
+                            }
+                            placeholder="Dinner at Sora"
+                          />
+                        </label>
+                        <label>
+                          Amount
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={expenseForm.amount}
+                            onChange={(event) => {
+                              setExpenseError("");
+                              setExpenseForm((prev) => ({
+                                ...prev,
+                                amount: event.target.value,
+                              }));
+                            }}
+                            placeholder="120.00"
+                          />
+                        </label>
+                        <label>
+                          Paid by
+                          <select
+                            value={
+                              expenseForm.paidBy ||
+                              currentGroup.members[0]?.id ||
+                              ""
+                            }
+                            onChange={(event) =>
+                              setExpenseForm((prev) => ({
+                                ...prev,
+                                paidBy: event.target.value,
+                              }))
+                            }
+                          >
+                            {currentGroup.members.map((member) => (
+                              <option key={member.id} value={member.id}>
+                                {member.name}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+
+                        <div className="split-type">
+                          <p>Split type</p>
+                          <div className="toggle">
+                            <button
+                              type="button"
+                              className={
+                                expenseForm.splitType === "even"
+                                  ? "active"
+                                  : ""
+                              }
+                              onClick={() => {
+                                setExpenseError("");
+                                setExpenseForm((prev) => ({
+                                  ...prev,
+                                  splitType: "even",
+                                }));
+                              }}
+                            >
+                              Even
+                            </button>
+                            <button
+                              type="button"
+                              className={
+                                expenseForm.splitType === "custom"
+                                  ? "active"
+                                  : ""
+                              }
+                              onClick={() => {
+                                setExpenseError("");
+                                setExpenseForm((prev) => ({
+                                  ...prev,
+                                  splitType: "custom",
+                                }));
+                              }}
+                            >
+                              Custom
+                            </button>
+                          </div>
+                        </div>
+
+                        {expenseForm.splitType === "even" ? (
+                          <div className="split">
+                            <p>Split between</p>
+                            <div className="pill-grid">
+                              {currentGroup.members.map((member) => {
+                                const isActive =
+                                  expenseForm.participants.length === 0 ||
+                                  expenseForm.participants.includes(member.id);
+                                return (
+                                  <button
+                                    key={member.id}
+                                    type="button"
+                                    className={`pill ${
+                                      isActive ? "active" : ""
+                                    }`}
+                                    onClick={() =>
+                                      handleToggleParticipant(member.id)
+                                    }
+                                  >
+                                    {member.name}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="split custom">
+                            <p>Custom amounts</p>
+                            <div className="custom-grid">
+                              {currentGroup.members.map((member) => (
+                                <label key={member.id} className="custom-field">
+                                  <span>{member.name}</span>
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    value={
+                                      expenseForm.customSplits[member.id] || ""
+                                    }
+                                    onChange={(event) => {
+                                      setExpenseError("");
+                                      setExpenseForm((prev) => ({
+                                        ...prev,
+                                        customSplits: {
+                                          ...prev.customSplits,
+                                          [member.id]: event.target.value,
+                                        },
+                                      }));
+                                    }}
+                                    placeholder="0.00"
+                                  />
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {expenseError && (
+                          <p className="error">{expenseError}</p>
+                        )}
+
+                        <button className="primary" type="submit">
+                          {editingExpenseId ? "Save changes" : "Add expense"}
+                        </button>
+                      </form>
+
+                      <section className="card ledger">
+                        <div className="card-header">
+                          <h3>Recent activity</h3>
+                        </div>
+                        {currentGroup.expenses.length === 0 ? (
+                          <p className="muted">
+                            No expenses yet. Add your first one.
+                          </p>
+                        ) : (
+                          <ul className="list">
+                            {currentGroup.expenses.map((expense) => {
+                              const payer = currentGroup.members.find(
+                                (member) => member.id === expense.paidBy
+                              );
                               return (
-                                <button
-                                  key={member.id}
-                                  type="button"
-                                  className={`pill ${isActive ? "active" : ""}`}
-                                  onClick={() =>
-                                    handleToggleParticipant(member.id)
-                                  }
-                                >
-                                  {member.name}
-                                </button>
+                                <li key={expense.id}>
+                                  <div>
+                                    <span>{expense.description}</span>
+                                    <small>
+                                      Paid by {payer?.name} ·{" "}
+                                      {new Date(
+                                        expense.createdAt
+                                      ).toLocaleDateString("en-IN", {
+                                        month: "short",
+                                        day: "numeric",
+                                      })}
+                                    </small>
+                                  </div>
+                                  <div className="actions">
+                                    <strong>
+                                      {formatMoney(expense.amountCents)}
+                                    </strong>
+                                    <div className="action-buttons">
+                                      <button
+                                        className="ghost"
+                                        type="button"
+                                        onClick={() =>
+                                          handleEditExpense(expense)
+                                        }
+                                      >
+                                        Edit
+                                      </button>
+                                      <button
+                                        className="ghost danger"
+                                        type="button"
+                                        onClick={() =>
+                                          handleDeleteExpense(expense.id)
+                                        }
+                                      >
+                                        Remove
+                                      </button>
+                                    </div>
+                                  </div>
+                                </li>
                               );
                             })}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="split custom">
-                          <p>Custom amounts</p>
-                          <div className="custom-grid">
-                            {currentGroup.members.map((member) => (
-                              <label key={member.id} className="custom-field">
-                                <span>{member.name}</span>
-                                <input
-                                  type="number"
-                                  min="0"
-                                  step="0.01"
-                                  value={
-                                    expenseForm.customSplits[member.id] || ""
-                                  }
-                                  onChange={(event) => {
-                                    setExpenseError("");
-                                    setExpenseForm((prev) => ({
-                                      ...prev,
-                                      customSplits: {
-                                        ...prev.customSplits,
-                                        [member.id]: event.target.value,
-                                      },
-                                    }));
-                                  }}
-                                  placeholder="0.00"
-                                />
-                              </label>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {expenseError && <p className="error">{expenseError}</p>}
-
-                      <button className="primary" type="submit">
-                        {editingExpenseId ? "Save changes" : "Add expense"}
-                      </button>
-                    </form>
-
-                    <section className="card ledger">
-                      <div className="card-header">
-                        <h3>Recent activity</h3>
-                      </div>
-                      {currentGroup.expenses.length === 0 ? (
-                        <p className="muted">
-                          No expenses yet. Add your first one.
-                        </p>
-                      ) : (
-                        <ul className="list">
-                          {currentGroup.expenses.map((expense) => {
-                            const payer = currentGroup.members.find(
-                              (member) => member.id === expense.paidBy
-                            );
-                            return (
-                              <li key={expense.id}>
-                                <div>
-                                  <span>{expense.description}</span>
-                                  <small>
-                                    Paid by {payer?.name} ·{" "}
-                                    {new Date(
-                                      expense.createdAt
-                                    ).toLocaleDateString("en-IN", {
-                                      month: "short",
-                                      day: "numeric",
-                                    })}
-                                  </small>
-                                </div>
-                                <div className="actions">
-                                  <strong>
-                                    {formatMoney(expense.amountCents)}
-                                  </strong>
-                                  <div className="action-buttons">
-                                    <button
-                                      className="ghost"
-                                      type="button"
-                                      onClick={() =>
-                                        handleEditExpense(expense)
-                                      }
-                                    >
-                                      Edit
-                                    </button>
-                                    <button
-                                      className="ghost danger"
-                                      type="button"
-                                      onClick={() =>
-                                        handleDeleteExpense(expense.id)
-                                      }
-                                    >
-                                      Remove
-                                    </button>
-                                  </div>
-                                </div>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      )}
+                          </ul>
+                        )}
+                      </section>
                     </section>
-                  </section>
-                </>
+                  </>
+                )
               }
             />
           </Routes>
-        )}
       </main>
     </div>
   );
