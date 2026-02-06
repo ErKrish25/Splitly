@@ -12,6 +12,22 @@
   --danger-soft: #fbecec;
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #11130f;
+    --panel: #1b1f18;
+    --ink: #f5f4f1;
+    --muted: #b3ada5;
+    --accent: #5bd0a4;
+    --accent-soft: #1f3a30;
+    --border: #2b3127;
+    --shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
+    --danger: #f06a5f;
+    --danger-soft: #3a1f1d;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
