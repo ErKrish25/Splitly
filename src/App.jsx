@@ -499,9 +499,15 @@ export default function App() {
                     friendNames: event.target.value,
                   }))
                 }
+                list="friend-suggestions"
                 placeholder="Ava, Leo"
               />
             </label>
+            <datalist id="friend-suggestions">
+              {data.friends.map((friend) => (
+                <option key={friend.id} value={friend.name} />
+              ))}
+            </datalist>
             <label>
               Paid by
               <select
