@@ -36,14 +36,8 @@ body {
   margin: 0;
   font-family: "Source Sans 3", system-ui, sans-serif;
   color: var(--ink);
-  background: radial-gradient(circle at top, #ffffff 0%, var(--bg) 35%, #ece8e2 100%);
+  background: var(--bg);
   min-height: 100vh;
-}
-
-@media (prefers-color-scheme: dark) {
-  body {
-    background: radial-gradient(circle at top, #1f251d 0%, var(--bg) 45%, #0f110e 100%);
-  }
 }
 
 h1,
@@ -99,7 +93,7 @@ select {
   place-items: center;
   font-weight: 700;
   font-family: "Space Grotesk", system-ui, sans-serif;
-  box-shadow: 0 10px 20px rgba(45, 143, 111, 0.35);
+  box-shadow: none;
 }
 
 .topbar h1 {
@@ -252,7 +246,7 @@ select {
   padding: 0.9rem 1.2rem;
   border-radius: 999px;
   font-weight: 600;
-  box-shadow: 0 12px 30px rgba(45, 143, 111, 0.35);
+  box-shadow: none;
 }
 
 .sheet {
