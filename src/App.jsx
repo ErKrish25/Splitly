@@ -7,6 +7,7 @@ const APP_CURRENCY = "INR";
 const seedData = {
   currentGroupId: null,
   groups: [],
+  personalExpenses: [],
 };
 
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -140,6 +141,13 @@ export default function App() {
   const [editingExpenseId, setEditingExpenseId] = useState(null);
   const [expenseError, setExpenseError] = useState("");
   const [groupEditError, setGroupEditError] = useState("");
+  const [expenseMode, setExpenseMode] = useState("group");
+
+  const [personalForm, setPersonalForm] = useState({
+    description: "",
+    amount: "",
+  });
+  const [editingPersonalId, setEditingPersonalId] = useState(null);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -162,10 +170,25 @@ export default function App() {
     return computeBalances(currentGroup);
   }, [currentGroup]);
 
+  const personalTotal = useMemo(() => {
+    return data.personalExpenses.reduce(
+      (sum, expense) => sum + expense.amountCents,
+      0
+    );
+  }, [data.personalExpenses]);
+
   const settlements = useMemo(() => {
     if (!balances) return [];
     return computeSettlements(balances);
   }, [balances]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const mode = params.get("mode");
+    if (mode === "personal" || mode === "group") {
+      setExpenseMode(mode);
+    }
+  }, [location.search]);
 
   const handleAddGroup = (event) => {
     event.preventDefault();
@@ -333,6 +356,61 @@ export default function App() {
         splitType: "even",
         customSplits: {},
       });
+    }
+  };
+
+  const handleAddPersonalExpense = (event) => {
+    event.preventDefault();
+    const description = personalForm.description.trim();
+    const amountCents = toCents(personalForm.amount);
+    if (!description || amountCents <= 0) return;
+
+    const expense = {
+      id: editingPersonalId || uid(),
+      description,
+      amountCents,
+      createdAt: editingPersonalId
+        ? data.personalExpenses.find((item) => item.id === editingPersonalId)
+            ?.createdAt || Date.now()
+        : Date.now(),
+    };
+
+    setData((prev) => ({
+      ...prev,
+      personalExpenses: editingPersonalId
+        ? prev.personalExpenses.map((item) =>
+            item.id === editingPersonalId ? expense : item
+          )
+        : [expense, ...prev.personalExpenses],
+    }));
+
+    setEditingPersonalId(null);
+    setPersonalForm({ description: "", amount: "" });
+  };
+
+  const handleEditPersonalExpense = (expense) => {
+    setEditingPersonalId(expense.id);
+    setPersonalForm({
+      description: expense.description,
+      amount: (expense.amountCents / 100).toFixed(2),
+    });
+    if (location.pathname !== "/expenses") {
+      navigate("/expenses?mode=personal");
+    } else {
+      setExpenseMode("personal");
+    }
+  };
+
+  const handleDeletePersonalExpense = (expenseId) => {
+    setData((prev) => ({
+      ...prev,
+      personalExpenses: prev.personalExpenses.filter(
+        (expense) => expense.id !== expenseId
+      ),
+    }));
+    if (editingPersonalId === expenseId) {
+      setEditingPersonalId(null);
+      setPersonalForm({ description: "", amount: "" });
     }
   };
 
@@ -558,6 +636,14 @@ export default function App() {
                           .join(" · ")}
                       </p>
                     </div>
+                    <div className="header-actions">
+                      <NavLink className="ghost" to="/groups">
+                        Add group
+                      </NavLink>
+                      <NavLink className="primary" to="/expenses?mode=personal">
+                        Add expense
+                      </NavLink>
+                    </div>
                     <div className="summary">
                       <div>
                         <p className="muted">Total spent</p>
@@ -685,6 +771,20 @@ export default function App() {
                         Save group changes
                       </button>
                     </form>
+
+                    <div className="card">
+                      <h3>Personal spending</h3>
+                      <p className="muted">Individual expenses (no group).</p>
+                      <div className="personal-total">
+                        <span>Total</span>
+                        <strong>{formatMoney(personalTotal)}</strong>
+                      </div>
+                      <div className="card-actions">
+                        <NavLink className="ghost" to="/expenses?mode=personal">
+                          View personal expenses
+                        </NavLink>
+                      </div>
+                    </div>
                   </section>
                 </>
               )
@@ -693,26 +793,155 @@ export default function App() {
             <Route
               path="/expenses"
               element={
-                !currentGroup ? (
-                  <section className="empty">
-                    <h2>Select a group first.</h2>
-                    <p>
-                      Head to the Groups page to create or select a group before
-                      adding expenses.
-                    </p>
-                  </section>
-                ) : (
-                  <>
-                    <header className="header">
-                      <div>
-                        <p className="eyebrow">Expenses</p>
-                        <h2>Add and manage expenses</h2>
-                        <p className="muted">
-                          {currentGroup.name} · {currentGroup.members.length}
-                        </p>
-                      </div>
-                    </header>
+                <>
+                  <header className="header">
+                    <div>
+                      <p className="eyebrow">Expenses</p>
+                      <h2>Add and manage expenses</h2>
+                      <p className="muted">
+                        {expenseMode === "group" && currentGroup
+                          ? `${currentGroup.name} · ${currentGroup.members.length} members`
+                          : "Personal expenses (no group)"}
+                      </p>
+                    </div>
+                    <div className="toggle header-toggle">
+                      <button
+                        type="button"
+                        className={expenseMode === "group" ? "active" : ""}
+                        onClick={() => setExpenseMode("group")}
+                      >
+                        Group
+                      </button>
+                      <button
+                        type="button"
+                        className={expenseMode === "personal" ? "active" : ""}
+                        onClick={() => setExpenseMode("personal")}
+                      >
+                        Personal
+                      </button>
+                    </div>
+                  </header>
 
+                  {expenseMode === "personal" ? (
+                    <section className="grid two">
+                      <form className="card" onSubmit={handleAddPersonalExpense}>
+                        <div className="card-header">
+                          <h3>
+                            {editingPersonalId
+                              ? "Edit personal expense"
+                              : "Add personal expense"}
+                          </h3>
+                          {editingPersonalId && (
+                            <button
+                              className="ghost"
+                              type="button"
+                              onClick={() => {
+                                setEditingPersonalId(null);
+                                setPersonalForm({ description: "", amount: "" });
+                              }}
+                            >
+                              Cancel
+                            </button>
+                          )}
+                        </div>
+                        <label>
+                          Description
+                          <input
+                            type="text"
+                            value={personalForm.description}
+                            onChange={(event) =>
+                              setPersonalForm((prev) => ({
+                                ...prev,
+                                description: event.target.value,
+                              }))
+                            }
+                            placeholder="Uber ride"
+                          />
+                        </label>
+                        <label>
+                          Amount
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={personalForm.amount}
+                            onChange={(event) =>
+                              setPersonalForm((prev) => ({
+                                ...prev,
+                                amount: event.target.value,
+                              }))
+                            }
+                            placeholder="120.00"
+                          />
+                        </label>
+                        <button className="primary" type="submit">
+                          {editingPersonalId ? "Save changes" : "Add expense"}
+                        </button>
+                      </form>
+
+                      <section className="card ledger">
+                        <div className="card-header">
+                          <h3>Personal expenses</h3>
+                        </div>
+                        {data.personalExpenses.length === 0 ? (
+                          <p className="muted">
+                            No personal expenses yet. Add your first one.
+                          </p>
+                        ) : (
+                          <ul className="list">
+                            {data.personalExpenses.map((expense) => (
+                              <li key={expense.id}>
+                                <div>
+                                  <span>{expense.description}</span>
+                                  <small>
+                                    {new Date(
+                                      expense.createdAt
+                                    ).toLocaleDateString("en-IN", {
+                                      month: "short",
+                                      day: "numeric",
+                                    })}
+                                  </small>
+                                </div>
+                                <div className="actions">
+                                  <strong>
+                                    {formatMoney(expense.amountCents)}
+                                  </strong>
+                                  <div className="action-buttons">
+                                    <button
+                                      className="ghost"
+                                      type="button"
+                                      onClick={() =>
+                                        handleEditPersonalExpense(expense)
+                                      }
+                                    >
+                                      Edit
+                                    </button>
+                                    <button
+                                      className="ghost danger"
+                                      type="button"
+                                      onClick={() =>
+                                        handleDeletePersonalExpense(expense.id)
+                                      }
+                                    >
+                                      Remove
+                                    </button>
+                                  </div>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </section>
+                    </section>
+                  ) : !currentGroup ? (
+                    <section className="empty">
+                      <h2>Select a group first.</h2>
+                      <p>
+                        Head to the Groups page to create or select a group
+                        before adding group expenses.
+                      </p>
+                    </section>
+                  ) : (
                     <section className="grid two">
                       <form className="card" onSubmit={handleAddExpense}>
                         <div className="card-header">
@@ -961,8 +1190,8 @@ export default function App() {
                         )}
                       </section>
                     </section>
-                  </>
-                )
+                  )}
+                </>
               }
             />
           </Routes>
