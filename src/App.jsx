@@ -110,10 +110,23 @@ const parseMembers = (input) =>
     .map((member) => member.trim())
     .filter(Boolean);
 
+const normalizeData = (raw) => {
+  if (!raw) return seedData;
+  const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+  return {
+    ...seedData,
+    ...parsed,
+    groups: Array.isArray(parsed.groups) ? parsed.groups : [],
+    personalExpenses: Array.isArray(parsed.personalExpenses)
+      ? parsed.personalExpenses
+      : [],
+  };
+};
+
 export default function App() {
   const [data, setData] = useState(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : seedData;
+    return normalizeData(stored);
   });
 
   const navigate = useNavigate();
