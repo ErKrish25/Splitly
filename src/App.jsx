@@ -336,7 +336,6 @@ export default function App() {
           </button>
         ) : null}
         <div className="brand">
-          <div className="logo">S</div>
           <div>
             <h1>Splitly</h1>
             <p>Keep money clean</p>

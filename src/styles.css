@@ -86,18 +86,6 @@ select {
   text-align: center;
 }
 
-.logo {
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  background: var(--accent);
-  color: #fff;
-  display: grid;
-  place-items: center;
-  font-weight: 700;
-  font-family: "Space Grotesk", system-ui, sans-serif;
-  box-shadow: none;
-}
 
 .topbar h1 {
   font-size: 1.9rem;
