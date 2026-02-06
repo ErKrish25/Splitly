@@ -83,8 +83,27 @@ select {
   z-index: 5;
 }
 
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--accent);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  box-shadow: 0 10px 20px rgba(45, 143, 111, 0.35);
+}
+
 .topbar h1 {
-  font-size: 1.6rem;
+  font-size: 1.9rem;
 }
 
 .topbar p {
@@ -132,6 +151,11 @@ select {
 
 .friend-row h3 {
   margin-bottom: 0.2rem;
+  font-size: 1.25rem;
+}
+
+.friend-row .muted {
+  font-size: 0.95rem;
 }
 
 .chevron {

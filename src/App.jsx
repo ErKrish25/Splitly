@@ -335,9 +335,12 @@ export default function App() {
             Back
           </button>
         ) : null}
-        <div>
-          <h1>Splitly</h1>
-          <p>Keep money clean</p>
+        <div className="brand">
+          <div className="logo">S</div>
+          <div>
+            <h1>Splitly</h1>
+            <p>Keep money clean</p>
+          </div>
         </div>
       </header>
 
