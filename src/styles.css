@@ -75,15 +75,12 @@ select {
   background: color-mix(in srgb, var(--bg) 92%, transparent);
   backdrop-filter: blur(10px);
   z-index: 5;
-  justify-content: center;
 }
 
 .brand {
   display: flex;
   align-items: center;
   gap: 0.9rem;
-  margin: 0 auto;
-  text-align: center;
 }
 
 .logo {
@@ -114,8 +111,6 @@ select {
   border-radius: 12px;
   padding: 0.4rem 0.8rem;
   font-weight: 600;
-  position: absolute;
-  left: 1.75rem;
 }
 
 .content {
