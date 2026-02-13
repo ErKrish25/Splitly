@@ -79,7 +79,6 @@ export default function App() {
 
   const [selectedFriendId, setSelectedFriendId] = useState(null);
   const [showExpenseForm, setShowExpenseForm] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
 
   const [expenseForm, setExpenseForm] = useState({
     description: "",
@@ -136,52 +135,6 @@ export default function App() {
       expense.paidBy === selectedFriendId
     );
   }, [data.expenses, selectedFriendId]);
-
-  const friendInsights = useMemo(() => {
-    return data.friends
-      .map((friend) => {
-        const related = data.expenses.filter(
-          (expense) =>
-            expense.paidBy === friend.id || expense.participants.includes(friend.id)
-        );
-        const latest = related.reduce(
-          (latestTime, expense) => Math.max(latestTime, expense.createdAt || 0),
-          0
-        );
-        return {
-          ...friend,
-          balance: friendBalances[friend.id] || 0,
-          latestAt: latest,
-        };
-      })
-      .sort((a, b) => b.latestAt - a.latestAt);
-  }, [data.friends, data.expenses, friendBalances]);
-
-  const filteredFriendInsights = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-    if (!query) return friendInsights;
-    return friendInsights.filter((friend) =>
-      friend.name.toLowerCase().includes(query)
-    );
-  }, [friendInsights, searchQuery]);
-
-  const receivablesTotal = useMemo(
-    () =>
-      friendInsights.reduce(
-        (sum, friend) => sum + (friend.balance > 0 ? friend.balance : 0),
-        0
-      ),
-    [friendInsights]
-  );
-
-  const payablesTotal = useMemo(
-    () =>
-      friendInsights.reduce(
-        (sum, friend) => sum + (friend.balance < 0 ? Math.abs(friend.balance) : 0),
-        0
-      ),
-    [friendInsights]
-  );
 
   const handleAddExpense = (event) => {
     event.preventDefault();
@@ -346,18 +299,6 @@ export default function App() {
     return "Shared expense";
   };
 
-  const formatRelativeTime = (timestamp) => {
-    if (!timestamp) return "No activity";
-    const diffMs = Date.now() - timestamp;
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    if (diffHours < 1) return "Just now";
-    if (diffHours < 24) return `${diffHours}h ago`;
-    const diffDays = Math.floor(diffHours / 24);
-    if (diffDays < 7) return `${diffDays}d ago`;
-    const diffWeeks = Math.floor(diffDays / 7);
-    return `${diffWeeks}w ago`;
-  };
-
   const handleQuickSettle = (friendId) => {
     const balance = friendBalances[friendId] || 0;
     if (balance === 0) return;
@@ -395,97 +336,31 @@ export default function App() {
           </button>
         ) : null}
         <div className="brand">
-          <div className="brand-icon">L</div>
           <div>
-            <h1>Premium Ledger</h1>
+            <h1>Splitly</h1>
             <p>Keep money clean</p>
           </div>
         </div>
-        {!selectedFriend ? <button className="profile-btn">O</button> : null}
       </header>
 
       {!selectedFriend ? (
         <main className="content">
-          <section className="summary-grid">
-            <article className="summary-card">
-              <p className="summary-label">
-                <span className="summary-icon up">↑</span> Payables
-              </p>
-              <h3>{formatMoney(payablesTotal)}</h3>
-              <p className="muted">
-                {
-                  friendInsights.filter((friend) => friend.balance < 0).length
-                }{" "}
-                pending
-              </p>
-            </article>
-            <article className="summary-card">
-              <p className="summary-label positive">
-                <span className="summary-icon down">↓</span> Receivables
-              </p>
-              <h3>{formatMoney(receivablesTotal)}</h3>
-              <p className="muted">
-                {
-                  friendInsights.filter((friend) => friend.balance > 0).length
-                }{" "}
-                accounts
-              </p>
-            </article>
-          </section>
-
-          <section className="search-wrap">
-            <span className="search-icon">⌕</span>
-            <input
-              type="text"
-              placeholder="Search friend..."
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-            />
-          </section>
-
-          <section className="activity-head">
-            <h2>Recent Activity</h2>
-            <button type="button" className="soft-btn">
-              View all
-            </button>
-          </section>
-
           <section className="section">
-            {filteredFriendInsights.length === 0 ? (
+            {data.friends.length === 0 ? (
               <p className="muted">Add an expense to create your first friend.</p>
             ) : (
               <div className="friend-list">
-                {filteredFriendInsights.map((friend) => (
+                {data.friends.map((friend) => (
                   <button
                     key={friend.id}
-                    className="friend-row card-row"
+                    className="friend-row"
                     onClick={() => setSelectedFriendId(friend.id)}
                   >
-                    <div className="friend-main">
-                      <div className="avatar">{friend.name.slice(0, 2).toUpperCase()}</div>
-                      <div>
-                        <h3>{friend.name}</h3>
-                        <p className="muted">{formatRelativeTime(friend.latestAt)}</p>
-                      </div>
+                    <div>
+                      <h3>{friend.name}</h3>
+                      <p className="muted">{renderFriendAmount(friend.id)}</p>
                     </div>
-                    <div className="friend-side">
-                      <strong>{formatMoney(Math.abs(friend.balance))}</strong>
-                      <span
-                        className={`status-pill ${
-                          friend.balance > 0
-                            ? "receive"
-                            : friend.balance < 0
-                            ? "pay"
-                            : "settled"
-                        }`}
-                      >
-                        {friend.balance > 0
-                          ? "RECEIVE"
-                          : friend.balance < 0
-                          ? "PAY"
-                          : "SETTLED"}
-                      </span>
-                    </div>
+                    <span className="chevron">›</span>
                   </button>
                 ))}
               </div>
@@ -561,7 +436,7 @@ export default function App() {
       )}
 
       <button className="fab" onClick={() => setShowExpenseForm(true)}>
-        +
+        + Add expense
       </button>
 
       {showExpenseForm && (
@@ -747,25 +622,6 @@ export default function App() {
           </form>
         </div>
       )}
-
-      <nav className="bottom-nav">
-        <button className="nav-item active" type="button">
-          <span className="nav-glyph">⌂</span>
-          <span>Home</span>
-        </button>
-        <button className="nav-item" type="button">
-          <span className="nav-glyph">▦</span>
-          <span>Ledger</span>
-        </button>
-        <button className="nav-item" type="button">
-          <span className="nav-glyph">◫</span>
-          <span>Invoices</span>
-        </button>
-        <button className="nav-item" type="button">
-          <span className="nav-glyph">▤</span>
-          <span>Reports</span>
-        </button>
-      </nav>
     </div>
   );
 }
